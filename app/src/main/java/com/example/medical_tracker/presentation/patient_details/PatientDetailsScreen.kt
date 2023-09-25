@@ -39,12 +39,20 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
+import com.example.medical_tracker.Navigation.Screen
+import com.example.medical_tracker.view_model.PatientDetailsViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PatientDetailsScreen(
-    viewModel: PatientDetailsViewModel
+    viewModel: PatientDetailsViewModel = hiltViewModel(),
+    onBackClicked: () -> Unit,
+    onSuccessfullySaving: () -> Unit,
+    navController: NavHostController,
 ) {
 
     val state = viewModel.state
@@ -54,15 +62,29 @@ fun PatientDetailsScreen(
     val context = LocalContext.current
 
 
-
     LaunchedEffect(key1 = Unit) {
         delay(500)
         focusRequester.requestFocus()
     }
+    LaunchedEffect(key1 = Unit){
+        viewModel.eventFlow.collectLatest { event->
+            when(event){
+                PatientDetailsViewModel.UiEvent.SaveNote -> {
+                    onSuccessfullySaving
+                    Toast.makeText(context,"Successfully Saved",Toast.LENGTH_SHORT).show()
+                }
+                is PatientDetailsViewModel.UiEvent.ShowToast -> {
+                    Toast.makeText(context,event.message,Toast.LENGTH_SHORT).show()
 
+                }
+            }
+        }
+    }
     Scaffold(
         topBar = {
-            TopBar(onBackClick = {})
+            TopBar(onBackClick = {
+                navController.navigate(Screen.PatientList.route)
+            })
         }
     ) {
         Column(
@@ -81,7 +103,7 @@ fun PatientDetailsScreen(
                     .focusRequester(focusRequester),
                 value =state.name,
                 onValueChange = {newValue->
-                    viewModel.onEvent(PatientDetailsEvent.EnteredName(newValue))
+                    viewModel.onAction(PatientDetailsEvent.EnteredName(newValue))
                 },
                 label = { Text(text = "Name") },
                 textStyle = MaterialTheme.typography.bodyLarge,
@@ -103,7 +125,7 @@ fun PatientDetailsScreen(
                     modifier = Modifier.weight(1f),
                     value = state.age,
                     onValueChange = {newValue->
-                        viewModel.onEvent(PatientDetailsEvent.EnteredAge(newValue))
+                        viewModel.onAction(PatientDetailsEvent.EnteredAge(newValue))
                     },
                     label = { Text(text = "Age") },
                     textStyle = MaterialTheme.typography.bodyLarge,
@@ -121,13 +143,13 @@ fun PatientDetailsScreen(
                     modifier = Modifier.padding(horizontal = 10.dp),
                     text = "Male",
                     selected = state.gender==1,
-                    onClick = {viewModel.onEvent(PatientDetailsEvent.SelectedMale)}
+                    onClick = {viewModel.onAction(PatientDetailsEvent.SelectedMale)}
                 )
                 RadioGroup(
                     modifier = Modifier.padding(horizontal = 10.dp),
                     text = "Female",
                     selected =  state.gender==2,
-                    onClick = {viewModel.onEvent(PatientDetailsEvent.SelectedFemale)}
+                    onClick = {viewModel.onAction(PatientDetailsEvent.SelectedFemale)}
                 )
             }
             Spacer(modifier = Modifier.height(10.dp))
@@ -135,7 +157,7 @@ fun PatientDetailsScreen(
                 modifier = Modifier.fillMaxWidth(),
                 value = state.doctorAssigned,
                 onValueChange = {newValue->
-                    viewModel.onEvent(PatientDetailsEvent.EnteredAssignedDoctor(newValue))
+                    viewModel.onAction(PatientDetailsEvent.EnteredAssignedDoctor(newValue))
                 },
                 label = { Text(text = "Assigned Doctor's Name") },
                 textStyle = MaterialTheme.typography.bodyLarge,
@@ -154,7 +176,7 @@ fun PatientDetailsScreen(
                     .weight(1f),
                 value = state.prescription,
                 onValueChange = {newValue->
-                    viewModel.onEvent(PatientDetailsEvent.EnteredPrescription(newValue))
+                    viewModel.onAction(PatientDetailsEvent.EnteredPrescription(newValue))
                 },
                 label = { Text(text = "Note") },
                 textStyle = MaterialTheme.typography.bodyLarge,
@@ -162,7 +184,10 @@ fun PatientDetailsScreen(
             Spacer(modifier = Modifier.height(10.dp))
             Button(
                 modifier = Modifier.fillMaxWidth(),
-                onClick = {  }
+                onClick = {
+                    viewModel.onAction(PatientDetailsEvent.SaveButton)
+                    navController.navigate(Screen.PatientList.route)
+                }
             ) {
                 Text(
                     text = "Save",

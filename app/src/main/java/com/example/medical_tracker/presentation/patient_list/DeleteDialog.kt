@@ -11,38 +11,34 @@ import androidx.room.Delete
 
 @Composable
 fun DeleteDialog(
-    title:String,
+    title: String,
     message: String,
-    onDialogDismiss : ()-> Unit,
-        onConfirmButtonClicked : ()-> Unit,
-){
+    onDialogDismiss: () -> Unit,
+    confirmButtonClicked: () -> Unit
+) {
     AlertDialog(
         title = {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.bodyLarge
-                )
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge
+            )
         },
         text = {
             Text(
                 text = message,
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.bodyMedium
             )
         },
-        onDismissRequest = { onDialogDismiss() },
         confirmButton = {
-            TextButton(
-                onClick = {onConfirmButtonClicked }
-            ) {
-            Text(text = "Yes")
-        }
-    },
+            TextButton(onClick = confirmButtonClicked) {
+                Text(text = "Yes")
+            }
+        },
         dismissButton = {
-            TextButton(
-                onClick = {onDialogDismiss }
-            ) {
+            TextButton(onClick = onDialogDismiss) {
                 Text(text = "No")
             }
-        }
+        },
+        onDismissRequest = onDialogDismiss
     )
 }

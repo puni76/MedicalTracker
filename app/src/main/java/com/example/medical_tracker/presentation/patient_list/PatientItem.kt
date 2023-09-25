@@ -29,36 +29,32 @@ import com.example.medical_tracker.domain.model.Patient
 @Composable
 fun PatientItem(
     patient: Patient,
-    onItemClicked: () -> Unit,
-    onDeleteConfirm:() -> Unit
-){
+    modifier: Modifier = Modifier,
+    onItemClick: () -> Unit,
+    onDeleteConfirm: () -> Unit,
+) {
     var showDialog by remember { mutableStateOf(false) }
 
-    if (showDialog){
+    if (showDialog) {
         DeleteDialog(
             title = "Delete",
             message = "Are you sure, you want to delete " +
                     "patient \"${patient.name}\" from patients list",
             onDialogDismiss = { showDialog = false },
-            onConfirmButtonClicked = {
-                onDeleteConfirm()
-                showDialog = false
-            }
+            confirmButtonClicked = onDeleteConfirm
         )
     }
-    Card (
-            modifier = Modifier.clickable { onItemClicked() },
-            elevation = CardDefaults.cardElevation(4.dp)
-    ){
-        Row (
+
+    Card(
+        modifier = modifier.clickable { onItemClick() },
+    ) {
+        Row(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(10.dp),
             verticalAlignment = Alignment.CenterVertically
-        ){
-            Column (
-                modifier = Modifier.weight(9f)
-            ){
+        ) {
+            Column(modifier = Modifier.weight(9f)) {
                 Text(
                     text = patient.name,
                     style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
@@ -74,10 +70,14 @@ fun PatientItem(
             }
             IconButton(
                 modifier = Modifier.weight(1f),
-                onClick = { showDialog = true}
+                onClick = { showDialog = true }
             ) {
-                Icon(imageVector = Icons.Filled.Delete, contentDescription = "Delete")
+                Icon(
+                    imageVector = Icons.Filled.Delete,
+                    contentDescription = "Delete Icon"
+                )
             }
         }
     }
 }
+

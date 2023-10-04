@@ -54,7 +54,6 @@ fun PatientDetailsScreen(
     onSuccessfullySaving: () -> Unit,
     navController: NavHostController,
 ) {
-
     val state = viewModel.state
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
